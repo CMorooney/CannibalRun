@@ -1,0 +1,41 @@
+﻿<Properties>
+  <MonoDevelop.Ide.Workbench ActiveDocument="addons/ldtk-import/Json/LevelJson.cs">
+    <Files>
+      <File FileName="addons/ldtk-import/LDtkEditorPlugin.cs" />
+      <File FileName="addons/ldtk-import/Importers/LDtkImporter.cs" />
+      <File FileName="addons/ldtk-import/Importers/TileSetImporter.cs" />
+      <File FileName="addons/ldtk-import/Importers/LevelImporter.cs" Line="33" Column="13" />
+      <File FileName="addons/ldtk-import/Importers/TileMapImporter.cs" Line="173" Column="1" />
+      <File FileName="addons/ldtk-import/Json/LDtkImportSettings.cs" NotebookId="1" />
+      <File FileName="addons/ldtk-import/Json/WorldJson.cs" Line="162" Column="53" NotebookId="1" />
+      <File FileName="addons/ldtk-import/Utils/TileCoord.cs" Line="32" Column="6" NotebookId="1" />
+      <File FileName="addons/ldtk-import/Json/LevelJson.cs" Line="112" Column="1" NotebookId="1" />
+    </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State name="__root__">
+          <Node name="CannibalRun" expanded="True">
+            <Node name="CannibalRun" expanded="True">
+              <Node name="Dependencies" expanded="True" />
+              <Node name="addons" expanded="True">
+                <Node name="ldtk-import" expanded="True">
+                  <Node name="Importers" expanded="True" />
+                  <Node name="Json" expanded="True" />
+                  <Node name="Utils" expanded="True" />
+                </Node>
+              </Node>
+            </Node>
+          </Node>
+        </State>
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+  <MultiItemStartupConfigurations />
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore>
+      <Breakpoint file="/Users/calvin/repos/CannibalRun/addons/ldtk-import/LDtkEditorPlugin.cs" relfile="addons/ldtk-import/LDtkEditorPlugin.cs" line="74" column="1" />
+    </BreakpointStore>
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+</Properties>
