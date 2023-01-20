@@ -21,3 +21,4 @@ mono_crash.*.json
 .vs/
 
 # End of https://www.toptal.com/developers/gitignore/api/godot
+.DS_Store
