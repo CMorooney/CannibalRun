@@ -1,0 +1,86 @@
+{
+  // [The only required setting]
+  // Folder in which the plugin will place
+  // the generated tilesets and scenes
+  "outputDir": "res://worlds/Overworld/",
+
+  // If true, plugin will delete all (!) *.tscn files
+  // from outputDir before importing. TileSets will
+  // not be deleted to keep your changes like collisions
+  "clearOutput": false,
+
+  // Templates of the path by which the plugin
+  // will search for the scene of entity
+  // ({} is replaced by entity name from LDtk)
+  "entityPaths": [
+    "res://scenes/mobs/{}/{}.tscn",
+    "res://scenes/decor/{}/{}.tscn"
+  ],
+
+  // If the plugin did not find the entity name
+  // in entitySceneOverrides, one of entityPaths
+  // will be used instead
+  "entityPathOverrides": {
+    "Item": "res://items/Item.tscn"
+  },
+
+  // If worldScene settings is present,
+  // plugin will generate a scene with all
+  // level scenes at their positions
+  "worldScene": {
+    // Use base to add additional nodes or script.
+    // Note that you must reimport after making a
+    // change in base World/Level scene. See
+    // https://github.com/godotengine/godot-proposals/issues/3907
+    "base": "res://scenes/world.tscn",
+
+    // If base scene is used plugin will remove all
+    // children whose names matches a mask as in
+    // String.Match (case sensitive!).
+    // Use this to test something before importing
+    "baseIgnoreMask": "_*",
+
+    // If present plugin will make (or search in base)
+    // a seperate node for storing levels
+    "levelsParent": "Levels",
+
+    // If true plugin will place Position2D
+    // nodes with level names and their scene
+    // paths in EditorDescription property
+    "onlyMarkers": false
+  },
+
+  "levelScene": {
+    // Same as worldScene.base
+    "base": "res://scenes/level.tscn",
+
+    // Same as worldScene.baseIgnoreMask.
+    // Has a higher priority than baseNodeMask!
+    "baseIgnoreMask": "_*",
+
+    // If base scene is used plugin will search for
+    // children whose name matches baseNodeMask as in
+    // String.Match (case sensitive!). Instead of creating
+    // a new nodes plugin will use these children as a template.
+    // Use this for custom materials, collision layers and etc.
+    // Here's the list of nodes that the plugin will look for:
+    // - TileMap in tile layer (clears existing tiles)
+    // - Sprite and ColorRect for background
+    "baseNodeMask": "Base*",
+
+    // Same as worldScene.levelsParent.
+    // Plugin will create/find a node for layer
+    // and add generated children to it (entities or TileMaps)
+    // (for example you can prepare a YSort node for entity layer)
+    "layersParent": "Layers",
+
+    // If present plugin will make (or search in base)
+    // a seperate node for background (ColorRect and Sprite).
+    // Else background will be placed before all other nodes
+    "bgParent": "Background",
+
+    // If true plugin will not include ColorRect node
+    // for solid level background
+    "ignoreBgColor": false
+  }
+}
