@@ -23,30 +23,34 @@ namespace Picalines.Godot.LDtkImport.Importers
             var textureImage = texture.GetData();
 
             int tileFullSize = tileSetJson.TileGridSize + tileSetJson.Spacing;
-            int gridWidth = (tileSetJson.PxWidth - tileSetJson.Padding) / tileFullSize;
-            int gridHeight = (tileSetJson.PxHeight - tileSetJson.Padding) / tileFullSize;
+            int gridWidth = ((tileSetJson.PxWidth - tileSetJson.Padding) / tileFullSize) + 1;
+            int gridHeight = ((tileSetJson.PxHeight - tileSetJson.Padding) / tileFullSize) + 1;
 
             int gridSize = gridWidth * gridHeight;
 
             var usedTileIds = tileSet.GetTilesIds();
 
-            for (int tileId = 0; tileId < gridSize; tileId++)
+            int tileId = 0;
+            int indexer = 0;
+            while (tileId < gridSize)
             {
-                if (usedTileIds.Contains(tileId))
-                {
-                    tileSet.TileSetTexture(tileId, texture);
-                    continue;
-                }
-
-                var tileRegion = GetTileRegion(tileId, tileSetJson);
+                var tileRegion = GetTileRegion(indexer, tileSetJson);
 
                 if (!textureImage.GetRect(tileRegion).IsInvisible())
                 {
+                    if (usedTileIds.Contains(tileId))
+                    {
+                        tileSet.RemoveTile(tileId);
+                    }
+                
                     tileSet.CreateTile(tileId);
                     tileSet.TileSetTileMode(tileId, TileSet.TileMode.SingleTile);
                     tileSet.TileSetTexture(tileId, texture);
                     tileSet.TileSetRegion(tileId, tileRegion);
+                    tileId++;
                 }
+
+                indexer++;
             }
         }
 
