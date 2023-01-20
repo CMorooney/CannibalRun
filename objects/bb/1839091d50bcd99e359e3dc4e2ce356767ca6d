@@ -1,0 +1,15 @@
+[module "f43ba302-a9db-30a5-92e2-3e7c3a7937ab"]
+	conflict = request-pull
+	excludePath = /.vs\n/.vscode\n\n/.import\n/.mono\n\n/test\n\nproject.godot
+	path = addons
+	pull = merge rebase
+	pull = squash never
+	ref = if refs/heads/master sync refs/heads/main
+	subtree = addons/ldtk-import
+	url = agnostic://gh/591297791
+[map "063117d7-b37f-3d88-8e89-a2d03bcd79ab"]
+	excludePath = /.vs\n/.vscode\n\n/.import\n/.mono\n\n/test\n\nproject.godot
+	object = fca827c90ed5665e93cb8af495f872e18baffc5f
+	path = addons
+	stage = sync
+	type = extract module + exclude
