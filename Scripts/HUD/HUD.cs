@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using static Utils;
 
 public class HUD : CanvasLayer
 {
@@ -8,28 +9,20 @@ public class HUD : CanvasLayer
 
     private float _healthValue = Constants.Player.MaxHealth;
 
-#pragma warning disable CS8618 // Non-nullable field
-
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     private TextureProgress _healthIndicator;
     private const string _indicatorName = "Health";
-
-#pragma warning restore CS8618 // Non-nullable field
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
     public override void _Ready()
     {
-        _healthIndicator = GetNode<TextureProgress>($"{_indicatorName}");
-        if (_healthIndicator == null)
-        {
-            var message = $"[{nameof(HUD)} : {nameof(_Ready)}] Couldn't find health indicator by name of {_indicatorName}. Exiting.";
-            GD.Print(message);
-            throw new ApplicationException(message);
-        }
+        _healthIndicator = GetOrThrow<TextureProgress>(this, $"{_indicatorName}");
     }
 
     public void AddHealth(float amount)
     {
         _healthValue = Math.Max(Constants.Player.MinHealth,
-	                            Math.Min(amount, Constants.Player.MaxHealth));
+	                            Math.Min(_healthValue + amount, Constants.Player.MaxHealth));
     }
 
     // Called every frame. 'delta' is the elapsed time since the previous frame.

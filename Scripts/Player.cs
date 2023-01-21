@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using static Utils;
 
 public class Player : KinematicBody2D
 {
@@ -9,6 +10,11 @@ public class Player : KinematicBody2D
 
     [Signal]
     private delegate void Died();
+
+#pragma warning disable CS8618 // Non-nullable field
+    private HUD _HUD;
+    private const string _hudName = "HUD";
+#pragma warning disable CS8618 // Non-nullable field
 
     private bool _dead;
 
@@ -20,16 +26,24 @@ public class Player : KinematicBody2D
 
     public override void _Ready()
     {
+        _HUD = GetOrThrow<HUD>(GetParent(), _hudName);
+
         ConnectToSignals();
     }
 
     public override void _PhysicsProcess(float delta)
     {
+        ReduceHealth();
         GetInput();
         _velocity = MoveAndSlide(_velocity);
     }
 
-	private void GetInput()
+    private void ReduceHealth()
+    {
+        _HUD.AddHealth(-0.00001f);
+    }
+
+    private void GetInput()
     {
         _velocity = new Vector2
         {
