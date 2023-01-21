@@ -1,10 +1,16 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 
 public class Player : KinematicBody2D
 {
     [Export]
     public int Speed = 200;
+
+    private bool _interactingWithVictim;
+    private readonly List<IBodyPart> _bodyParts = BodyParts.All();
+
+    private float _health = 1f;// 0 - 1 for now
 
     private Vector2 _velocity = new Vector2();
 
