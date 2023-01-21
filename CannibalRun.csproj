@@ -16,4 +16,7 @@
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="LD52.ldtk" />
+  </ItemGroup>
 </Project>
