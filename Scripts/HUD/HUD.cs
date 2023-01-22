@@ -2,10 +2,11 @@ using Godot;
 using System;
 using static Utils;
 
+public delegate void HealthChanged(float newValue);
+
 public class HUD : CanvasLayer
 {
-   [Signal]
-    private delegate void HealthChanged(float newValue);
+    public event HealthChanged? HealthChanged;
 
     private float _healthValue = Constants.Player.MaxHealth;
 
@@ -30,6 +31,6 @@ public class HUD : CanvasLayer
     {
         float healthPercent = _healthValue / Constants.Player.MaxHealth;
         _healthIndicator.Value = _healthIndicator.MaxValue * healthPercent;
-        EmitSignal(nameof(HealthChanged), _healthValue);
+        HealthChanged?.Invoke(_healthValue);
     }
 }

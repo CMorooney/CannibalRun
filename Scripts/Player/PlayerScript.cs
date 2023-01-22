@@ -3,8 +3,12 @@ using System;
 using System.Collections.Generic;
 using static Utils;
 
+public delegate void Died();
+
 public class Player : KinematicBody2D
 {
+    public event Died? Died;
+
     [Export]
     public int Speed = 200;
 
@@ -27,7 +31,22 @@ public class Player : KinematicBody2D
 
         _HUD = GetOrThrow<HUD>(GetParent(), _hudName);
 
-        ConnectToSignals();
+        ConnectEvents();
+    }
+
+    public override void _ExitTree()
+    {
+        DisconnectEvents();
+    }
+
+    private void ConnectEvents()
+    {
+        _HUD.HealthChanged += HealthChanged;
+    }
+
+    private void DisconnectEvents()
+    { 
+        _HUD.HealthChanged -= HealthChanged;
     }
 
     public override void _PhysicsProcess(float delta)
@@ -39,6 +58,12 @@ public class Player : KinematicBody2D
 
     private void OnStateChanged(IPlayerState newState)
     { 
+        switch (newState)
+        {
+            case Dead:
+            Died?.Invoke();
+                break;
+        }
     }
 
     private void ReduceHealth()
@@ -79,16 +104,7 @@ public class Player : KinematicBody2D
 
         if (_health <= Constants.Player.MinHealth)
         {
-            if (!_dead)
-            {
-                _dead = true;
-                EmitSignal(nameof(Died));
-            }
+            _stateMachine!.Update(new Dead());
 	    }
-    }
-
-    private void ConnectToSignals()
-    {
-        Connect("HealthChanged", this, nameof(HealthChanged));
     }
 }

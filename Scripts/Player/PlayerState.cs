@@ -28,5 +28,5 @@ public record GobblingFlesh : IPlayerState
 
 public record Dead : IPlayerState
 {
-    public bool CanTransitionTo(IPlayerState state) => true;
+    public bool CanTransitionTo(IPlayerState state) => !(state is Dead);
 }

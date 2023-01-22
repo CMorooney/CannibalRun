@@ -18,6 +18,28 @@ public class Game : Node
         _stateMachine = new StateMachine<IGameState>(new Playing(), OnStateChanged);
         _player = GetOrThrow<Player>(this, _playerName);
         _hud = GetOrThrow<HUD>(this, _hudName);
+
+        ConnectEvents();
+    }
+
+    public override void _ExitTree()
+    {
+        DisconnectEvents();
+    }
+
+    private void ConnectEvents()
+    {
+        _player.Died += HandlePlayerDied;
+    }
+
+    private void DisconnectEvents()
+    {
+        _player.Died -= HandlePlayerDied;
+    }
+
+	private void HandlePlayerDied()
+    {
+        _stateMachine!.Update(new GameOver());
     }
 
     private void OnStateChanged(IGameState newState)
