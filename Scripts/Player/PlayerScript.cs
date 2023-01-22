@@ -8,15 +8,12 @@ public class Player : KinematicBody2D
     [Export]
     public int Speed = 200;
 
-    [Signal]
-    private delegate void Died();
+    private StateMachine<IPlayerState>? _stateMachine;
 
 #pragma warning disable CS8618 // Non-nullable field
     private HUD _HUD;
     private const string _hudName = "HUD";
 #pragma warning disable CS8618 // Non-nullable field
-
-    private bool _dead;
 
     private readonly List<IBodyPart> _bodyParts = BodyParts.All();
 
@@ -26,6 +23,8 @@ public class Player : KinematicBody2D
 
     public override void _Ready()
     {
+        _stateMachine = new StateMachine<IPlayerState>(new OnTheProwl(), OnStateChanged);
+
         _HUD = GetOrThrow<HUD>(GetParent(), _hudName);
 
         ConnectToSignals();
@@ -38,6 +37,10 @@ public class Player : KinematicBody2D
         _velocity = MoveAndSlide(_velocity);
     }
 
+    private void OnStateChanged(IPlayerState newState)
+    { 
+    }
+
     private void ReduceHealth()
     {
         _HUD.AddHealth(-0.00001f);
@@ -45,10 +48,7 @@ public class Player : KinematicBody2D
 
     private void GetInput()
     {
-        _velocity = new Vector2
-        {
-            x = 0, y = 0
-        };
+        _velocity = new Vector2();
 
         if (Input.IsActionPressed("right"))
         {
