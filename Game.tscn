@@ -1,13 +1,10 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=6 format=2]
 
-[ext_resource path="res://icon.png" type="Texture" id=1]
+[ext_resource path="res://Scenes/Player.tscn" type="PackedScene" id=1]
 [ext_resource path="res://Scripts/Game/Game.cs" type="Script" id=2]
 [ext_resource path="res://generated/ldtk/LDtk.tscn" type="PackedScene" id=3]
 [ext_resource path="res://Scenes/HUD.tscn" type="PackedScene" id=4]
-[ext_resource path="res://Scripts/Player/Player.cs" type="Script" id=5]
-
-[sub_resource type="RectangleShape2D" id=1]
-extents = Vector2( 8, 8 )
+[ext_resource path="res://Scenes/Victim.tscn" type="PackedScene" id=5]
 
 [node name="Game" type="Node2D"]
 script = ExtResource( 2 )
@@ -16,19 +13,8 @@ script = ExtResource( 2 )
 
 [node name="Tiles" parent="." instance=ExtResource( 3 )]
 
-[node name="Player" type="KinematicBody2D" parent="."]
-position = Vector2( 248, 150 )
-script = ExtResource( 5 )
+[node name="Victim" parent="." instance=ExtResource( 5 )]
+position = Vector2( 327, 137 )
 
-[node name="Sprite" type="Sprite" parent="Player"]
-scale = Vector2( 0.25, 0.25 )
-texture = ExtResource( 1 )
-region_rect = Rect2( 0, 0, 16, 16 )
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Player"]
-shape = SubResource( 1 )
-
-[node name="Camera2D" type="Camera2D" parent="Player"]
-position = Vector2( 18, 9 )
-current = true
-smoothing_enabled = true
+[node name="Player" parent="." instance=ExtResource( 1 )]
+position = Vector2( 247, 151 )
