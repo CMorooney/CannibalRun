@@ -51,7 +51,7 @@ public class Player : KinematicBody2D
 
     public override void _PhysicsProcess(float delta)
     {
-        ReduceHealth();
+        //ReduceHealth();
         GetInput();
         _velocity = MoveAndSlide(_velocity);
     }
@@ -104,7 +104,7 @@ public class Player : KinematicBody2D
 
         if (_health <= Constants.Player.MinHealth)
         {
-            _stateMachine!.Update(new Dead());
+            _stateMachine?.Update(new Dead());
 	    }
     }
 }
