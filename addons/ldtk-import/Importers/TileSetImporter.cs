@@ -26,12 +26,12 @@ namespace Picalines.Godot.LDtkImport.Importers
             var texture = GD.Load<Texture>(GetTexturePath(ldtkFilePath, tileSetJson));
             var textureImage = texture.GetData();
 
-            int tileSize = tileSetJson.TileGridSize;
-            int tileFullSize = tileSize + tileSetJson.Spacing;
-            int gridWidth = ((tileSetJson.PxWidth - tileSetJson.Padding) / tileFullSize) + 1;
-            int gridHeight = ((tileSetJson.PxHeight - tileSetJson.Padding) / tileFullSize) + 1;
+            uint tileSize = (uint)(tileSetJson.TileGridSize);
+            uint tileFullSize = (uint)(tileSize + tileSetJson.Spacing);
+            uint gridWidth = (uint)((tileSetJson.PxWidth - tileSetJson.Padding) / tileFullSize) + 1;
+            uint gridHeight = (uint)((tileSetJson.PxHeight - tileSetJson.Padding) / tileFullSize) + 1;
 
-            int gridSize = gridWidth * gridHeight;
+            uint gridSize = gridWidth * gridHeight;
 
             var blockTileIds = tileSetJson.EnumTags.First<TileEnumTag>(t => t.EnumValueId == "Block").TileIds;
 
@@ -57,9 +57,8 @@ namespace Picalines.Godot.LDtkImport.Importers
 
                     if (blockTileIds.Contains(tileId))
                     {
-                        var x = new List<int[]> { new[] { 0, 0 }, new [] { tileSize, 0 }, new [] { tileSize, tileSize } , new [] { 0, tileSize } };
-                        var colliderShape = CreateCollisionShapeFromPoints(x);
-                        tileSet.TileAddShape(tileId, colliderShape, new Transform2D(), false);
+                        var colliderShape = CollisionRectForSize(tileSize);
+                        tileSet.TileSetShape(tileId, tileId, colliderShape);
                     }
 
                     tileId++;
@@ -69,16 +68,17 @@ namespace Picalines.Godot.LDtkImport.Importers
             }
         }
 
-        private static ConvexPolygonShape2D CreateCollisionShapeFromPoints(List<int[]> points)
+        private static ConvexPolygonShape2D CollisionRectForSize(uint size)
         {
             var shape = new ConvexPolygonShape2D();
-            var ps = new List<Vector2>();
-            foreach (var point in points)
-            {
-                ps.Add(new Vector2(point[0], point[1]));
-                shape.Points = ps.ToArray();
-            }
+            var points = new List<Vector2> {
+                                new Vector2(0, 0),
+                                new Vector2(size, 0),
+                                new Vector2(size, size),
+                                new Vector2(0, size)
+                        };
 
+            shape.Points = points.ToArray();
             return shape;
         }
 
