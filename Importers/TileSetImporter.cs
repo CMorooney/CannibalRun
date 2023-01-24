@@ -51,7 +51,7 @@ namespace Picalines.Godot.LDtkImport.Importers
                     {
                         tileSet.RemoveTile(tileId);
                     }
-                
+
                     tileSet.CreateTile(tileId);
                     tileSet.TileSetTileMode(tileId, TileSet.TileMode.SingleTile);
                     tileSet.TileSetTexture(tileId, texture);
