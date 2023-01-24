@@ -7,8 +7,9 @@
 	ref = if refs/heads/master sync refs/heads/main
 	subtree = addons/ldtk-import
 	url = agnostic://gh/591481817
-[map "5a4c7546-a30f-391b-9b5f-26fc248b5eb5"]
+[map "4ea2688c-e7d7-3ffe-b3b7-0353eddf2e81"]
 	excludePath = /.vs\n/.vscode\n\n/.import\n/.mono\n\n/test\n\nproject.godot
 	object = c791086c3663e514aa33ca559a1899b5ffd494f5
 	path = addons/ldtk-import
+	stage = sync
 	type = extract module + exclude
