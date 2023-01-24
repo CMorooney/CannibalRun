@@ -51,7 +51,7 @@ namespace Picalines.Godot.LDtkImport.Importers
                     {
                         tileSet.RemoveTile(tileId);
                     }
-                
+
                     tileSet.CreateTile(tileId);
                     tileSet.TileSetTileMode(tileId, TileSet.TileMode.SingleTile);
                     tileSet.TileSetTexture(tileId, texture);
@@ -78,14 +78,14 @@ namespace Picalines.Godot.LDtkImport.Importers
         private static NavigationPolygon NavShapeForTile(uint size)
         {
             var polygon = new NavigationPolygon();
-            polygon.Vertices = new[] {
+            polygon.AddOutline(new[] {
                                 new Vector2(0, 0),
                                 new Vector2(size, 0),
                                 new Vector2(size, size),
                                 new Vector2(0, size)
-                            };
+                            });
 
-            polygon.AddPolygon(new[] { 0, 1, 2, 3 });
+            polygon.MakePolygonsFromOutlines();
 
             return polygon;
         }
