@@ -2,8 +2,8 @@ using System.Collections.Generic;
 
 public interface IBodyPart
 {
-  string Name { get; }
-  float Value { get; }
+    string Name { get; }
+    float Value { get; }
 }
 
 public static class BodyParts

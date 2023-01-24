@@ -14,7 +14,10 @@ script = ExtResource( 2 )
 [node name="LDtk" parent="." instance=ExtResource( 3 )]
 
 [node name="Victim" parent="." instance=ExtResource( 5 )]
-position = Vector2( 327, 137 )
+position = Vector2( 327, 145 )
 
 [node name="Player" parent="." instance=ExtResource( 1 )]
 position = Vector2( 247, 151 )
+
+[editable path="Victim"]
+[editable path="Victim/ActionMenu"]

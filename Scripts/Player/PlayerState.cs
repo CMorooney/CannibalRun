@@ -1,4 +1,5 @@
 ﻿using System;
+using Godot;
 
 public interface IPlayerState : IMachineState<IPlayerState> { }
 
@@ -9,21 +10,24 @@ public record OnTheProwl : IPlayerState
 
 public record InteractingWithVictim : IPlayerState
 {
-    public bool CanTransitionTo(IPlayerState state) =>
-                                                        state is OnTheProwl;
+    public bool CanTransitionTo(IPlayerState state) => state is ConsumingFlesh ||
+                                                       state is OnTheProwl     ||
+	                                                   state is Dead;
 }
 
 public record ConsumingFlesh : IPlayerState
 {
-    public bool CanTransitionTo(IPlayerState state) =>
-                                                        state is InteractingWithVictim ||
-                                                        state is GobblingFlesh;
+    public bool CanTransitionTo(IPlayerState state) => state is GobblingFlesh ||
+                                                       state is OnTheProwl ||
+                                                       state is Dead;
 }
 
 public record GobblingFlesh : IPlayerState
 {
     public bool CanTransitionTo(IPlayerState state) =>
-                                                        state is ConsumingFlesh;
+                                                        state is ConsumingFlesh ||
+                                                        state is OnTheProwl     ||
+                                                        state is Dead;
 }
 
 public record Dead : IPlayerState

@@ -26,7 +26,7 @@ public class Player : KinematicBody2D
     private const string _hudName = "HUD";
 
     private List<RayCast2D> _rayCasts;
-#pragma warning disable CS8618 // Non-nullable field
+#pragma warning restore CS8618 // Non-nullable field
 
     private readonly List<IBodyPart> _bodyParts = BodyParts.All();
 
@@ -70,10 +70,11 @@ public class Player : KinematicBody2D
     public override void _PhysicsProcess(float delta)
     {
         ReduceHealth();
-        SetVelocityToInput();
+        SetVelocityToDirectionalInput();
         CheckForCollisions();
+        CheckForInteractionInput();
 
-        if (!_blocked)// this may be set by above functions
+        if (!_blocked && !(_stateMachine!.State is InteractingWithVictim))
         {
             _velocity = MoveAndSlide(_velocity);
         }
@@ -94,7 +95,7 @@ public class Player : KinematicBody2D
         _HUD.AddHealth(-0.00001f);
     }
 
-    private void SetVelocityToInput()
+    private void SetVelocityToDirectionalInput()
     {
         _velocity = new Vector2();
 
@@ -135,6 +136,7 @@ public class Player : KinematicBody2D
             recast = true;
         }
 
+        // up / down
         if(Math.Abs(_velocity.y) > 0)
         { 
             _rayCasts[0].Position = new Vector2(SidewaysCollisionThreshold, 0);
@@ -169,6 +171,31 @@ public class Player : KinematicBody2D
                 _blocked = true;
                 break;
         };
+    }
+
+    private void CheckForInteractionInput()
+    {
+        if (Input.IsActionPressed("interact"))
+        {
+            switch (_stateMachine!.State)
+            {
+                case OnTheProwl:
+                    var target = _rayCasts.Where(c => c.IsColliding())
+                                          .Select(c => c.GetCollider())
+                                          .FirstOrDefault();
+                    if(target != null && target is Victim victim)
+                    {
+                        _stateMachine.Update(new InteractingWithVictim());
+                        victim.ShowMenu(BodyPartTaken);
+                    }
+                    break;
+            }
+        }
+    }
+
+    private void BodyPartTaken(IBodyPart bodyPart)
+    {
+        _stateMachine!.Update(new ConsumingFlesh());
     }
 
     private void HealthChanged(float newValue)
