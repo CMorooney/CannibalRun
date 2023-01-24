@@ -1,12 +1,13 @@
 ﻿#if TOOLS
 
 using Godot;
+using System;
 using System.Linq;
 using System.Collections.Generic;
 using Picalines.Godot.LDtkImport.Json;
 using Picalines.Godot.LDtkImport.Utils;
+using Array = Godot.Collections.Array;
 using static Picalines.Godot.LDtkImport.Json.WorldJson.TileSetDefinition;
-using System;
 
 namespace Picalines.Godot.LDtkImport.Importers
 {
@@ -34,6 +35,7 @@ namespace Picalines.Godot.LDtkImport.Importers
             uint gridSize = gridWidth * gridHeight;
 
             var blockTileIds = tileSetJson.EnumTags.First<TileEnumTag>(t => t.EnumValueId == "Block").TileIds;
+            var traversableTilsIds = tileSetJson.EnumTags.First<TileEnumTag>(t => t.EnumValueId == "Traverse").TileIds;
 
             var usedTileIds = tileSet.GetTilesIds();
 
@@ -57,8 +59,13 @@ namespace Picalines.Godot.LDtkImport.Importers
 
                     if (blockTileIds.Contains(tileId))
                     {
-                        var colliderShape = CollisionRectForSize(tileSize);
+                        var colliderShape = ShapeForTile(tileSize);
                         tileSet.TileSetShape(tileId, tileId, colliderShape);
+                    }
+                    else if(traversableTilsIds.Contains(tileId))
+                    {
+                        var navigationShape = NavShapeForTile(tileSize);
+                        tileSet.TileSetNavigationPolygon(tileId, navigationShape);
                     }
 
                     tileId++;
@@ -68,7 +75,22 @@ namespace Picalines.Godot.LDtkImport.Importers
             }
         }
 
-        private static ConvexPolygonShape2D CollisionRectForSize(uint size)
+        private static NavigationPolygon NavShapeForTile(uint size)
+        {
+            var polygon = new NavigationPolygon();
+            polygon.AddOutline(new[] {
+                                new Vector2(0, 0),
+                                new Vector2(size, 0),
+                                new Vector2(size, size),
+                                new Vector2(0, size)
+                            });
+
+            polygon.MakePolygonsFromOutlines();
+
+            return polygon;
+        }
+
+        private static ConvexPolygonShape2D ShapeForTile(uint size)
         {
             var shape = new ConvexPolygonShape2D();
             var points = new List<Vector2> {
