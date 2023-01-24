@@ -194,9 +194,9 @@ public class Player : KinematicBody2D
                     break;
                 case ConsumingFlesh fleshState:
                     var food = fleshState.BodyPart;
-                    food.Value -= HealthPerBite;
+                    food.Health -= HealthPerBite;
                     _HUD.AddHealth(HealthPerBite);
-                    if (food.Value > 0)
+                    if (food.Health > 0)
                     {
                         _stateMachine!.Update(new ConsumingFlesh(food));
                     }
