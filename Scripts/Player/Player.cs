@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using static Utils;
 
@@ -13,7 +14,10 @@ public class Player : KinematicBody2D
     public int Speed = 200;
 
     [Export]
-    public int ForwardCollisionThreshold = 50;
+    public int ForwardCollisionThreshold = 14;
+
+    [Export]
+    public int SidewaysCollisionThreshold = 6;
 
     private StateMachine<IPlayerState>? _stateMachine;
 
@@ -21,13 +25,14 @@ public class Player : KinematicBody2D
     private HUD _HUD;
     private const string _hudName = "HUD";
 
-    private RayCast2D _rayCast;
+    private List<RayCast2D> _rayCasts;
 #pragma warning disable CS8618 // Non-nullable field
 
     private readonly List<IBodyPart> _bodyParts = BodyParts.All();
 
     private float _health = Constants.Player.MaxHealth;
 
+    private bool _blocked = false;
     private Vector2 _velocity = new Vector2();
 
     public override void _Ready()
@@ -35,7 +40,14 @@ public class Player : KinematicBody2D
         _stateMachine = new StateMachine<IPlayerState>(new OnTheProwl(), OnStateChanged);
 
         _HUD = GetOrThrow<HUD>(GetParent(), _hudName);
-        _rayCast = GetOrThrow<RayCast2D>(this, nameof(RayCast2D));
+
+        var rayCast1 = GetOrThrow<RayCast2D>(this, $"{nameof(RayCast2D)}");
+        var rayCast2 = GetOrThrow<RayCast2D>(this, $"{nameof(RayCast2D)}2");
+        var rayCast3 = GetOrThrow<RayCast2D>(this, $"{nameof(RayCast2D)}3");
+        _rayCasts = new List<RayCast2D>()
+        {
+            rayCast1, rayCast2, rayCast3
+        };
 
         ConnectEvents();
     }
@@ -58,8 +70,13 @@ public class Player : KinematicBody2D
     public override void _PhysicsProcess(float delta)
     {
         ReduceHealth();
-        GetInput();
-        _velocity = MoveAndSlide(_velocity);
+        SetVelocityToInput();
+        CheckForCollisions();
+
+        if (!_blocked)// this may be set by above functions
+        {
+            _velocity = MoveAndSlide(_velocity);
+        }
     }
 
     private void OnStateChanged(IPlayerState newState)
@@ -77,8 +94,7 @@ public class Player : KinematicBody2D
         _HUD.AddHealth(-0.00001f);
     }
 
-    //TODO: break this up
-    private void GetInput()
+    private void SetVelocityToInput()
     {
         _velocity = new Vector2();
 
@@ -103,12 +119,56 @@ public class Player : KinematicBody2D
         }
 
         _velocity = _velocity.Normalized() * Speed;
+    }
 
-        if (Math.Abs(_velocity.x) > 0 || Math.Abs(_velocity.y) > 0)
+    private void CheckForCollisions()
+    {
+        var rc = _velocity.LimitLength(ForwardCollisionThreshold);
+
+        var recast = false;
+
+        // left / right
+        if (Math.Abs(_velocity.x) > 0)
         {
-            var rc = _velocity.LimitLength(20);
-            _rayCast.CastTo = new Vector2(rc.x, rc.y);
+            _rayCasts[0].Position = new Vector2(0, SidewaysCollisionThreshold);
+            _rayCasts[2].Position = new Vector2(0, -SidewaysCollisionThreshold);
+            recast = true;
         }
+
+        if(Math.Abs(_velocity.y) > 0)
+        { 
+            _rayCasts[0].Position = new Vector2(SidewaysCollisionThreshold, 0);
+            _rayCasts[2].Position = new Vector2(-SidewaysCollisionThreshold, 0);
+            recast = true;
+        }
+
+        _blocked = false;
+
+        foreach (var cast in _rayCasts)
+        {
+            if(recast)
+            {
+                cast.ForceRaycastUpdate();
+                cast.CastTo = new Vector2(rc.x, rc.y);
+            }
+            if (cast.IsColliding())
+            {
+                HandleCollision(cast.GetCollider());
+            }
+        }
+    }
+
+    private void HandleCollision(object collider)
+    {
+        switch(collider)
+        {
+            case KinematicBody2D kBody:
+                _blocked = true;
+                break;
+            case TileMap tileMap:
+                _blocked = true;
+                break;
+        };
     }
 
     private void HealthChanged(float newValue)

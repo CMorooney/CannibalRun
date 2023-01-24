@@ -18,6 +18,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="LD52.ldtk" />
+    <None Include="LD52.ldtk.import.settings.json" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Scripts\Player\" />

@@ -2,10 +2,10 @@
   // [The only required setting]
   // Folder in which the plugin will place
   // the generated tilesets and scenes
-  "outputDir": "res://generated/ldtk/",
+  "outputDir": "res://Scenes/LDtk/",
 
   // If true, plugin will delete all (!) *.tscn files
   // from outputDir before importing. TileSets will
   // not be deleted to keep your changes like collisions
-  "clearOutput": true,
+  "clearOutput": true
 }
