@@ -29,17 +29,21 @@ public class Game : Node
 
     private void ConnectEvents()
     {
-        _player.Died += HandlePlayerDied;
+        _player.HealthChanged += HandlePlayerHealthChanged;
     }
 
     private void DisconnectEvents()
     {
-        _player.Died -= HandlePlayerDied;
+        _player.HealthChanged -= HandlePlayerHealthChanged;
     }
 
-	private void HandlePlayerDied()
+	private void HandlePlayerHealthChanged(float newValue)
     {
-        _stateMachine!.Update(new GameOver());
+        _hud.SetPlayerHealth(newValue);
+        if (newValue <= 0)
+        {
+            _stateMachine!.Update(new GameOver());
+        }
     }
 
     private void OnStateChanged(IGameState newState)

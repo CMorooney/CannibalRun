@@ -4,11 +4,11 @@ using System.Linq;
 using System.Collections.Generic;
 using static Utils;
 
-public delegate void Died();
+public delegate void HealthChanged(float newValue);
 
 public class Player : KinematicBody2D
 {
-    public event Died? Died;
+    public event HealthChanged? HealthChanged;
 
     [Export]
     public int Speed = 200;
@@ -28,9 +28,6 @@ public class Player : KinematicBody2D
     private StateMachine<IPlayerState>? _stateMachine;
 
 #pragma warning disable CS8618 // Non-nullable field
-    private HUD _HUD;
-    private const string _hudName = "HUD";
-
     private List<RayCast2D> _rayCasts;
 #pragma warning restore CS8618 // Non-nullable field
 
@@ -45,8 +42,6 @@ public class Player : KinematicBody2D
     {
         _stateMachine = new StateMachine<IPlayerState>(new OnTheProwl(), OnStateChanged);
 
-        _HUD = GetOrThrow<HUD>(GetParent(), _hudName);
-
         var rayCast1 = GetOrThrow<RayCast2D>(this, $"{nameof(RayCast2D)}");
         var rayCast2 = GetOrThrow<RayCast2D>(this, $"{nameof(RayCast2D)}2");
         var rayCast3 = GetOrThrow<RayCast2D>(this, $"{nameof(RayCast2D)}3");
@@ -54,28 +49,11 @@ public class Player : KinematicBody2D
         {
             rayCast1, rayCast2, rayCast3
         };
-
-        ConnectEvents();
-    }
-
-    public override void _ExitTree()
-    {
-        DisconnectEvents();
-    }
-
-    private void ConnectEvents()
-    {
-        _HUD.HealthChanged += HealthChanged;
-    }
-
-    private void DisconnectEvents()
-    { 
-        _HUD.HealthChanged -= HealthChanged;
     }
 
     public override void _PhysicsProcess(float delta)
     {
-        ReduceHealth();
+        AddHealth(HealthPerFrame);
         SetVelocityToDirectionalInput();
         CheckForCollisions();
         CheckForInteractionInput();
@@ -88,15 +66,19 @@ public class Player : KinematicBody2D
 
     private void OnStateChanged(IPlayerState newState)
     { 
-        switch (newState)
-        {
-            case Dead:
-            Died?.Invoke();
-                break;
-        }
     }
 
-    private void ReduceHealth() => _HUD.AddHealth(HealthPerFrame);
+    private void AddHealth(float amount)
+    {
+        _health = Math.Max(Constants.Player.MinHealth,
+                    Math.Min(_health + amount, Constants.Player.MaxHealth));
+
+        HealthChanged?.Invoke(_health);
+        if(_health <= 0)
+        {
+            _stateMachine!.Update(new Dead());
+        }
+    }
 
     private void SetVelocityToDirectionalInput()
     {
@@ -195,7 +177,6 @@ public class Player : KinematicBody2D
                 case ConsumingFlesh fleshState:
                     var food = fleshState.BodyPart;
                     food.Health -= HealthPerBite;
-                    _HUD.AddHealth(HealthPerBite);
                     if (food.Health > 0)
                     {
                         _stateMachine!.Update(new ConsumingFlesh(food));
@@ -205,20 +186,14 @@ public class Player : KinematicBody2D
                         _stateMachine!.Update(new OnTheProwl());
                     }
 
+                    // probably best to call this last here since
+                    // it may also queue a state update (e.g. `Dead`)
+                    AddHealth(HealthPerBite);
+
                     break;
             }
         }
     }
 
     private void BodyPartTaken(IBodyPart bodyPart) => _stateMachine!.Update(new ConsumingFlesh(bodyPart));
-
-    private void HealthChanged(float newValue)
-    {
-        _health = newValue;
-
-        if (_health <= Constants.Player.MinHealth)
-        {
-            _stateMachine!.Update(new Dead());
-        }
-    }
 }
