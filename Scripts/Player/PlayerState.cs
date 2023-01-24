@@ -12,22 +12,20 @@ public record InteractingWithVictim : IPlayerState
 {
     public bool CanTransitionTo(IPlayerState state) => state is ConsumingFlesh ||
                                                        state is OnTheProwl     ||
-	                                                   state is Dead;
+                                                       state is Dead;
 }
 
 public record ConsumingFlesh : IPlayerState
 {
-    public bool CanTransitionTo(IPlayerState state) => state is GobblingFlesh ||
-                                                       state is OnTheProwl ||
-                                                       state is Dead;
-}
+    public IBodyPart BodyPart { get; private set; }
 
-public record GobblingFlesh : IPlayerState
-{
-    public bool CanTransitionTo(IPlayerState state) =>
-                                                        state is ConsumingFlesh ||
-                                                        state is OnTheProwl     ||
-                                                        state is Dead;
+    public ConsumingFlesh(IBodyPart _bodyPart)
+    {
+        BodyPart = _bodyPart;
+    }
+
+   public bool CanTransitionTo(IPlayerState state) => state is OnTheProwl ||
+                                                       state is Dead;
 }
 
 public record Dead : IPlayerState

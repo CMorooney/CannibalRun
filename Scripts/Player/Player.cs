@@ -14,6 +14,12 @@ public class Player : KinematicBody2D
     public int Speed = 200;
 
     [Export]
+    public float HealthPerBite = 0.01f;
+
+    [Export]
+    public float HealthPerFrame = -0.0007f;
+
+    [Export]
     public int ForwardCollisionThreshold = 14;
 
     [Export]
@@ -90,10 +96,7 @@ public class Player : KinematicBody2D
         }
     }
 
-    private void ReduceHealth()
-    {
-        _HUD.AddHealth(-0.00001f);
-    }
+    private void ReduceHealth() => _HUD.AddHealth(HealthPerFrame);
 
     private void SetVelocityToDirectionalInput()
     {
@@ -189,14 +192,25 @@ public class Player : KinematicBody2D
                         victim.ShowMenu(BodyPartTaken);
                     }
                     break;
+                case ConsumingFlesh fleshState:
+                    var food = fleshState.BodyPart;
+                    food.Value -= HealthPerBite;
+                    _HUD.AddHealth(HealthPerBite);
+                    if (food.Value > 0)
+                    {
+                        _stateMachine!.Update(new ConsumingFlesh(food));
+                    }
+                    else
+                    {
+                        _stateMachine!.Update(new OnTheProwl());
+                    }
+
+                    break;
             }
         }
     }
 
-    private void BodyPartTaken(IBodyPart bodyPart)
-    {
-        _stateMachine!.Update(new ConsumingFlesh());
-    }
+    private void BodyPartTaken(IBodyPart bodyPart) => _stateMachine!.Update(new ConsumingFlesh(bodyPart));
 
     private void HealthChanged(float newValue)
     {
