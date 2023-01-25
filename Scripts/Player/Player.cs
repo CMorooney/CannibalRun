@@ -16,6 +16,9 @@ public class Player : KinematicBody2D
     public int Speed = 200;
 
     [Export]
+    public float EatingSpeedModifier = 0.25f;
+
+    [Export]
     public float HealthPerBite = 0.01f;
 
     [Export]
@@ -116,7 +119,8 @@ public class Player : KinematicBody2D
             _velocity.y -= 1;
         }
 
-        _velocity = _velocity.Normalized() * Speed;
+        var modifier = _stateMachine!.State is ConsumingFlesh ? EatingSpeedModifier : 1;
+        _velocity = _velocity.Normalized() * (Speed * modifier);
     }
 
     private void CheckForCollisions()
