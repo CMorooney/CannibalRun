@@ -12,11 +12,19 @@ public class Player : KinematicBody2D
     public event HealthChanged? HealthChanged;
     public event InventoryChanged? InventoryChanged;
 
+    #region Exported Properties
+
     [Export]
     public int Speed = 200;
 
     [Export]
     public float EatingSpeedModifier = 0.25f;
+
+    [Export]
+    public float GobbleThreshold = 100;// in ms
+
+    [Export]
+    public float GobbleHealthModifer = 0.5f;
 
     [Export]
     public float HealthPerBite = 0.01f;
@@ -30,6 +38,8 @@ public class Player : KinematicBody2D
     [Export]
     public int SidewaysCollisionThreshold = 6;
 
+    #endregion
+
     private StateMachine<IPlayerState>? _stateMachine;
 
 #pragma warning disable CS8618 // Non-nullable field
@@ -39,6 +49,8 @@ public class Player : KinematicBody2D
     private readonly List<IBodyPart> _bodyParts = BodyParts.All();
 
     private float _health = Constants.Player.MaxHealth;
+
+    private long _lastGobbleButtonPress;
 
     private bool _blocked = false;
     private Vector2 _velocity = new Vector2();
@@ -83,17 +95,7 @@ public class Player : KinematicBody2D
         }
     }
 
-    private void AddHealth(float amount)
-    {
-        _health = Math.Max(Constants.Player.MinHealth,
-                    Math.Min(_health + amount, Constants.Player.MaxHealth));
-
-        HealthChanged?.Invoke(_health);
-        if(_health <= 0)
-        {
-            _stateMachine!.Update(new Dead());
-        }
-    }
+    #region Movement/Collisions
 
     private void SetVelocityToDirectionalInput()
     {
@@ -119,7 +121,9 @@ public class Player : KinematicBody2D
             _velocity.y -= 1;
         }
 
-        var modifier = _stateMachine!.State is ConsumingFlesh ? EatingSpeedModifier : 1;
+        var gobbling = DateTimeOffset.Now.ToUnixTimeMilliseconds() - _lastGobbleButtonPress < GobbleThreshold;
+        var modifier = _stateMachine!.State is ConsumingFlesh && !gobbling ? EatingSpeedModifier : 1;
+
         _velocity = _velocity.Normalized() * (Speed * modifier);
     }
 
@@ -174,40 +178,85 @@ public class Player : KinematicBody2D
         };
     }
 
+    #endregion
+
+    #region Interactions
+
     private void CheckForInteractionInput()
     {
         if (Input.IsActionPressed("interact"))
         {
-            switch (_stateMachine!.State)
-            {
-                case OnTheProwl:
-                    var target = _rayCasts.Where(c => c.IsColliding())
-                                          .Select(c => c.GetCollider())
-                                          .FirstOrDefault();
-                    if(target != null && target is Victim victim)
-                    {
-                        _stateMachine.Update(new InteractingWithVictim());
-                        victim.ShowMenu(BodyPartTaken);
-                    }
-                    break;
-                case ConsumingFlesh fleshState:
-                    var food = fleshState.BodyPart;
-                    food.Health -= HealthPerBite;
-                    if (food.Health > 0)
-                    {
-                        _stateMachine!.Update(new ConsumingFlesh(food));
-                    }
-                    else
-                    {
-                        _stateMachine!.Update(new OnTheProwl());
-                    }
+            HandleInteractPressed();
+        }
+        else if (Input.IsActionPressed("interact2"))
+        {
+            HandleInteract2Pressed();
+        }
+    }
 
-                    // probably best to call this last here since
-                    // it may also queue a state update (e.g. `Dead`)
-                    AddHealth(HealthPerBite);
+    private void HandleInteractPressed()
+    {
+        switch(_stateMachine!.State)
+        {
+            case OnTheProwl:
+                var target = _rayCasts.Where(c => c.IsColliding())
+                                      .Select(c => c.GetCollider())
+                                      .FirstOrDefault();
+                if (target != null && target is Victim victim)
+                {
+                    _stateMachine.Update(new InteractingWithVictim());
+                    victim.ShowMenu(BodyPartTaken);
+                }
+                break;
+            case ConsumingFlesh fleshState:
+                // order probably matters here --
+                // both `TakeBite` and `AddHealth`
+                // have potential state updating side effects.
 
-                    break;
-            }
+                // `AddHealth` will maybe publish `Dead,` though,
+                // so we'll do that last
+                TakeBite(fleshState.BodyPart);
+                AddHealth(HealthPerBite);
+                break;
+        }
+    }
+
+    private void HandleInteract2Pressed()
+    {
+        switch(_stateMachine!.State)
+        {
+            case ConsumingFlesh fleshState:
+                _lastGobbleButtonPress = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                TakeBite(fleshState.BodyPart);
+                AddHealth(HealthPerBite * GobbleHealthModifer);
+                break;
+        }
+    }
+
+    #endregion
+
+    private void TakeBite(IBodyPart bodyPart)
+    {
+        bodyPart.Health -= HealthPerBite;
+        if (bodyPart.Health > 0)
+        {
+            _stateMachine!.Update(new ConsumingFlesh(bodyPart));
+        }
+        else
+        {
+            _stateMachine!.Update(new OnTheProwl());
+        }
+    }
+
+    private void AddHealth(float amount)
+    {
+        _health = Math.Max(Constants.Player.MinHealth,
+                    Math.Min(_health + amount, Constants.Player.MaxHealth));
+
+        HealthChanged?.Invoke(_health);
+        if(_health <= 0)
+        {
+            _stateMachine!.Update(new Dead());
         }
     }
 
