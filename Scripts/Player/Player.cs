@@ -5,10 +5,12 @@ using System.Collections.Generic;
 using static Utils;
 
 public delegate void HealthChanged(float newValue);
+public delegate void InventoryChanged(IBodyPart? bodyPart);
 
 public class Player : KinematicBody2D
 {
     public event HealthChanged? HealthChanged;
+    public event InventoryChanged? InventoryChanged;
 
     [Export]
     public int Speed = 200;
@@ -65,7 +67,17 @@ public class Player : KinematicBody2D
     }
 
     private void OnStateChanged(IPlayerState newState)
-    { 
+    {
+        switch(newState)
+        {
+            case ConsumingFlesh fleshState:
+                InventoryChanged?.Invoke(fleshState.BodyPart);
+                break;
+
+            default:
+                InventoryChanged?.Invoke(null);
+                break;
+        }
     }
 
     private void AddHealth(float amount)

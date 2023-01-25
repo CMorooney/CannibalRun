@@ -22,22 +22,23 @@ public class Game : Node
         ConnectEvents();
     }
 
-    public override void _ExitTree()
-    {
-        DisconnectEvents();
-    }
+    public override void _ExitTree() => DisconnectEvents();
 
     private void ConnectEvents()
     {
         _player.HealthChanged += HandlePlayerHealthChanged;
+        _player.InventoryChanged += PlayerInventoryChanged;
     }
 
     private void DisconnectEvents()
     {
         _player.HealthChanged -= HandlePlayerHealthChanged;
+        _player.InventoryChanged -= PlayerInventoryChanged;
     }
 
-	private void HandlePlayerHealthChanged(float newValue)
+    private void PlayerInventoryChanged(IBodyPart? bodyPart) => _hud.SetBodyPart(bodyPart);
+
+    private void HandlePlayerHealthChanged(float newValue)
     {
         _hud.SetPlayerHealth(newValue);
         if (newValue <= 0)
