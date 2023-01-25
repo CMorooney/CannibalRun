@@ -49,6 +49,7 @@ public class Player : KinematicBody2D
     private readonly List<IBodyPart> _bodyParts = BodyParts.All();
 
     private float _health = Constants.Player.MaxHealth;
+    private bool isDead() => _health <= 0;
 
     private long _lastGobbleButtonPress;
 
@@ -75,7 +76,7 @@ public class Player : KinematicBody2D
         CheckForCollisions();
         CheckForInteractionInput();
 
-        if (!_blocked && !(_stateMachine!.State is InteractingWithVictim))
+        if (!_blocked && !isDead() && !(_stateMachine!.State is InteractingWithVictim))
         {
             _velocity = MoveAndSlide(_velocity);
         }

@@ -7,17 +7,17 @@ public class Game : Node
 
 #pragma warning disable CS8618 // Non-nullable field
     private Player _player;
-    private const string _playerName = "Player";
-
     private HUD _hud;
-    private const string _hudName = "HUD";
+    private GameOverCanvas _gameOverCanvas;
 #pragma warning disable CS8618 // Non-nullable field
 
     public override void _Ready()
     {
+        _player = GetOrThrow<Player>(this, "Player");
+        _hud = GetOrThrow<HUD>(this, "HUD");
+        _gameOverCanvas = GetOrThrow<GameOverCanvas>(this, "GameOver");
+
         _stateMachine = new StateMachine<IGameState>(new Playing(), OnStateChanged);
-        _player = GetOrThrow<Player>(this, _playerName);
-        _hud = GetOrThrow<HUD>(this, _hudName);
 
         ConnectEvents();
     }
@@ -49,6 +49,7 @@ public class Game : Node
 
     private void OnStateChanged(IGameState newState)
     {
+        _gameOverCanvas.Visible = newState is GameOver;
     }
 }
 

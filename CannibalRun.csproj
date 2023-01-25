@@ -23,5 +23,6 @@
   <ItemGroup>
     <Folder Include="Scripts\Player\" />
     <Folder Include="Scripts\Game\" />
+    <Folder Include="Scripts\GameOver\" />
   </ItemGroup>
 </Project>
