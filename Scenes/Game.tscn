@@ -2,7 +2,7 @@
 
 [ext_resource path="res://Scripts/Game/Game.cs" type="Script" id=1]
 [ext_resource path="res://Scenes/HUD.tscn" type="PackedScene" id=2]
-[ext_resource path="res://Scenes/LDtk/Level_0.tscn" type="PackedScene" id=3]
+[ext_resource path="res://Scenes/LDtk/LDtk.tscn" type="PackedScene" id=3]
 [ext_resource path="res://Scenes/GameOver.tscn" type="PackedScene" id=4]
 [ext_resource path="res://Scenes/Victim.tscn" type="PackedScene" id=5]
 [ext_resource path="res://Scenes/Player.tscn" type="PackedScene" id=6]
@@ -15,13 +15,13 @@ visible = false
 
 [node name="HUD" parent="." instance=ExtResource( 2 )]
 
-[node name="Level_0" parent="." instance=ExtResource( 3 )]
+[node name="LDtk" parent="." instance=ExtResource( 3 )]
 
 [node name="Victim" parent="." instance=ExtResource( 5 )]
 position = Vector2( 327, 145 )
 
 [node name="Player" parent="." instance=ExtResource( 6 )]
-position = Vector2( 247, 151 )
+position = Vector2( 553, 473 )
 
 [editable path="Victim"]
 [editable path="Victim/ActionMenu"]
