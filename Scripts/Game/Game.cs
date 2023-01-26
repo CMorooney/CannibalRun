@@ -28,13 +28,22 @@ public class Game : Node
     {
         _player.HealthChanged += HandlePlayerHealthChanged;
         _player.InventoryChanged += PlayerInventoryChanged;
+        _gameOverCanvas.Exit += ExitGame;
+        _gameOverCanvas.PlayAgain += RestartGame;
     }
+
 
     private void DisconnectEvents()
     {
         _player.HealthChanged -= HandlePlayerHealthChanged;
         _player.InventoryChanged -= PlayerInventoryChanged;
+        _gameOverCanvas.Exit -= ExitGame;
+        _gameOverCanvas.PlayAgain -= RestartGame;
     }
+
+    private void ExitGame() => GetTree().Quit();
+
+    private void RestartGame() => GetTree().ReloadCurrentScene();
 
     private void PlayerInventoryChanged(IBodyPart? bodyPart) => _hud.SetBodyPart(bodyPart);
 
