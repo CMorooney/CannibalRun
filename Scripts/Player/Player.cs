@@ -55,7 +55,6 @@ public class Player : KinematicBody2D
     private long _lastGobbleButtonPress;
 
     private bool _blocked = false;
-    private Vector2 _velocity = new Vector2();
 
     public override void _Ready()
     {
@@ -75,13 +74,15 @@ public class Player : KinematicBody2D
     public override void _PhysicsProcess(float delta)
     {
         AddHealth(HealthPerFrame);
-        SetVelocityToDirectionalInput();
-        CheckForCollisions();
+
+        var velocity = GetVelocityForInput();
+        CheckForCollisions(velocity);
+
         CheckForInteractionInput();
 
         if (!_blocked && !isDead() && !(_stateMachine!.State is InteractingWithVictim))
         {
-            _velocity = MoveAndSlide(_velocity);
+            MoveAndSlide(velocity);
         }
     }
 
@@ -104,50 +105,50 @@ public class Player : KinematicBody2D
 
     #region Movement/Collisions
 
-    private void SetVelocityToDirectionalInput()
+    private Vector2 GetVelocityForInput()
     {
-        _velocity = new Vector2();
+        var velocity = new Vector2();
 
         if (Input.IsActionPressed("right"))
         {
             _animatedSprite.Play("idle-side");
             _animatedSprite.FlipH = false;
-            _velocity.x += 1;
+            velocity.x += 1;
         }
 
         if (Input.IsActionPressed("left"))
         {
             _animatedSprite.Play("idle-side");
             _animatedSprite.FlipH = true;
-            _velocity.x -= 1;
+            velocity.x -= 1;
         }
 
         if (Input.IsActionPressed("down"))
         {
             _animatedSprite.Play("idle-front");
-            _velocity.y += 1;
+            velocity.y += 1;
         }
 
         if (Input.IsActionPressed("up"))
         {
             _animatedSprite.Play("idle-back");
-            _velocity.y -= 1;
+            velocity.y -= 1;
         }
 
         var gobbling = DateTimeOffset.Now.ToUnixTimeMilliseconds() - _lastGobbleButtonPress < GobbleThreshold;
         var modifier = _stateMachine!.State is ConsumingFlesh && !gobbling ? EatingSpeedModifier : 1;
 
-        _velocity = _velocity.Normalized() * (Speed * modifier);
+        return velocity.Normalized() * (Speed * modifier);
     }
 
-    private void CheckForCollisions()
+    private void CheckForCollisions(Vector2 velocity)
     {
-        var rc = _velocity.LimitLength(ForwardCollisionThreshold);
+        var rc = velocity.LimitLength(ForwardCollisionThreshold);
 
         var recast = false;
 
         // left / right
-        if (Math.Abs(_velocity.x) > 0)
+        if (Math.Abs(velocity.x) > 0)
         {
             _rayCasts[0].Position = new Vector2(0, SidewaysCollisionThreshold);
             _rayCasts[2].Position = new Vector2(0, -SidewaysCollisionThreshold);
@@ -155,7 +156,7 @@ public class Player : KinematicBody2D
         }
 
         // up / down
-        if(Math.Abs(_velocity.y) > 0)
+        if(Math.Abs(velocity.y) > 0)
         { 
             _rayCasts[0].Position = new Vector2(SidewaysCollisionThreshold, 0);
             _rayCasts[2].Position = new Vector2(-SidewaysCollisionThreshold, 0);
