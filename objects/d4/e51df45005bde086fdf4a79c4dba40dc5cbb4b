@@ -8,8 +8,8 @@
 	object = d8d3d713ee2a2f4adc9bf31ae8845b990ee06334
 	subtree = addons/ldtk-import
 	type = include + expand tree
-[map "950648f5-02bb-3df3-8f41-4c883bbcfac7"]
+[map "4fda863a-bc2d-30b1-ae52-467fced51fbc"]
 	excludePath = /.vs\n/.vscode\n\n/.import\n/.mono\n\n/test\n\nproject.godot
-	object = f75cf68f42315c17d4896d7fce050dbee9ad0ca4
+	object = d595d0b969c211778d96a4c6bc88ec49ef78ce20
 	path = addons/ldtk-import
 	type = include + expand module
