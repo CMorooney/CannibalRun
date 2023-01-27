@@ -50,7 +50,6 @@ public class Player : KinematicBody2D
     private readonly List<IBodyPart> _bodyParts = BodyParts.All();
 
     private float _health = Constants.Player.MaxHealth;
-    private bool isDead() => _health <= 0;
 
     private long _lastGobbleButtonPress;
 
@@ -80,7 +79,9 @@ public class Player : KinematicBody2D
 
         CheckForInteractionInput();
 
-        if (!_blocked && !isDead() && !(_stateMachine!.State is InteractingWithVictim))
+        if (!_blocked                       &&
+            !(_stateMachine!.State is Dead) &&
+            !(_stateMachine!.State is InteractingWithVictim))
         {
             MoveAndSlide(velocity);
         }
@@ -95,11 +96,9 @@ public class Player : KinematicBody2D
                 break;
         }
 
-        switch(previousState)
-        {
-            case ConsumingFlesh:
-                InventoryChanged?.Invoke(null);
-                break;
+        if(previousState is ConsumingFlesh && !(newState is ConsumingFlesh))
+        { 
+            InventoryChanged?.Invoke(null);
         }
     }
 
