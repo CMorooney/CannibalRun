@@ -56,7 +56,7 @@ public class Game : Node
         }
     }
 
-    private void OnStateChanged(IGameState newState)
+    private void OnStateChanged(IGameState previousState, IGameState newState)
     {
         _gameOverCanvas.Visible = newState is GameOver;
     }

@@ -85,15 +85,18 @@ public class Player : KinematicBody2D
         }
     }
 
-    private void OnStateChanged(IPlayerState newState)
+    private void OnStateChanged(IPlayerState previousState, IPlayerState newState)
     {
         switch(newState)
         {
             case ConsumingFlesh fleshState:
                 InventoryChanged?.Invoke(fleshState.BodyPart);
                 break;
+        }
 
-            default:
+        switch(previousState)
+        {
+            case ConsumingFlesh:
                 InventoryChanged?.Invoke(null);
                 break;
         }

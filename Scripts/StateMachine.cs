@@ -58,7 +58,7 @@ public interface IReadOnlyStateMachine<TState> where TState : IMachineState<TSta
     /// Event handler for when the machine's state changes.
     /// </summary>
     /// <param name="state">The new state of the machine.</param>
-    delegate void Changed(TState state);
+    delegate void Changed(TState previousState, TState newState);
 
     /// <summary>Event emitted when the machine's state changes.</summary>
     event Changed? OnChanged;
@@ -91,9 +91,9 @@ public sealed class StateMachine<TState> : IReadOnlyStateMachine<TState>
       IReadOnlyStateMachine<TState>.Changed? onChanged = null
     )
     {
+        Announce(state);
         State = state;
         if (onChanged != null) { OnChanged += onChanged; }
-        Announce();
     }
 
     /// <inheritdoc/>
@@ -147,8 +147,8 @@ public sealed class StateMachine<TState> : IReadOnlyStateMachine<TState>
 
             if (State.CanTransitionTo(state))
             {
+                Announce(state);
                 State = state;
-                Announce();
             }
             else
             {
@@ -167,5 +167,5 @@ public sealed class StateMachine<TState> : IReadOnlyStateMachine<TState>
     /// <br />
     /// Call this whenever you want to force a re-announcement.
     /// </summary>
-    public void Announce() => OnChanged?.Invoke(State);
+    public void Announce(TState newState) => OnChanged?.Invoke(State, newState);
 }
