@@ -21,8 +21,6 @@ namespace Picalines.Godot.LDtkImport.Importers
                 levelNode2D.ZIndex = context.LevelJson.WorldDepth;
             }
 
-            BackgroundImporter.Import(context, levelNode);
-
             AddLayers(context, levelNode);
 
             var levelFields = context.LevelJson.FieldInstances.ToDictionary(field => field.Identifier, field => field.Value);
@@ -51,23 +49,7 @@ namespace Picalines.Godot.LDtkImport.Importers
 
             foreach (var layerJson in context.LevelJson.LayerInstances!.Reverse())
             {
-                var layerNode = layersParent.GetNodeOrNull(layerJson.Identifier);
-
-                bool newChild = false;
-
-                if (layerNode is null)
-                {
-                    layerNode = new Node2D() { Name = layerJson.Identifier };
-                    newChild = true;
-                }
-
-                if (layerNode is CanvasItem canvasItem)
-                {
-                    canvasItem.Visible = layerJson.Visible;
-                    canvasItem.Modulate = Colors.White with { a = layerJson.Opacity };
-                }
-
-                if (layerNode is Node2D layer2D)
+                if (layersParent is Node2D layer2D)
                 {
                     layer2D.Position = layerJson.PxTotalOffset;
                 }
@@ -76,24 +58,18 @@ namespace Picalines.Godot.LDtkImport.Importers
                 {
                     case Json.LayerType.Entities:
                     {
-                        EntityLayerImporter.Import(context, layerJson, layerNode);
+                        EntityLayerImporter.Import(context, layerJson, layersParent);
                     }
                     break;
 
                     default:
                     {
-                        TileMapImporter.Import(context, layerJson, layerNode);
+                        TileMapImporter.Import(context, layerJson, layersParent);
                     }
                     break;
                 }
 
-                if (newChild)
-                {
-                    layersParent.AddChild(layerNode);
-                }
-
-                layerNode.Owner = levelNode;
-                foreach (var layerOwnedNode in GetOwned(layerNode, layerNode))
+                foreach (var layerOwnedNode in GetOwned(layersParent, layersParent))
                 {
                     layerOwnedNode.Owner = levelNode;
                 }

@@ -45,7 +45,8 @@ namespace Picalines.Godot.LDtkImport.Importers
                 var stackTileMap = (baseTileMap.Duplicate() as TileMap)!;
                 layerTileMaps.Add(stackTileMap);
 
-                stackTileMap.Name = maxTileStackSize == 1 ? "TileMap" : $"TileLayer_{i}";
+                stackTileMap.Name = layerJson.Identifier;
+                stackTileMap.ShowCollision = true;
                 stackTileMap.AddToGroup(StackLayerGroupName, persistent: false);
 
                 layerNode.AddChild(stackTileMap);
