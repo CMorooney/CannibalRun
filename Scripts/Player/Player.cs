@@ -223,14 +223,7 @@ public class Player : KinematicBody2D
                 }
                 break;
             case ConsumingFlesh fleshState:
-                // order probably matters here --
-                // both `TakeBite` and `AddHealth`
-                // have potential state updating side effects.
-
-                // `AddHealth` will maybe publish `Dead,` though,
-                // so we'll do that last
                 TakeBite(fleshState.BodyPart);
-                AddHealth(HealthPerBite);
                 break;
         }
     }
@@ -242,7 +235,6 @@ public class Player : KinematicBody2D
             case ConsumingFlesh fleshState:
                 _lastGobbleButtonPress = DateTimeOffset.Now.ToUnixTimeMilliseconds();
                 TakeBite(fleshState.BodyPart);
-                AddHealth(HealthPerBite * GobbleHealthModifer);
                 break;
         }
     }
@@ -260,6 +252,8 @@ public class Player : KinematicBody2D
         {
             _stateMachine!.Update(new OnTheProwl());
         }
+
+        AddHealth(HealthPerBite * GobbleHealthModifer);
     }
 
     private void AddHealth(float amount)
