@@ -44,6 +44,7 @@ public class Player : KinematicBody2D
 
 #pragma warning disable CS8618 // Non-nullable field
     private List<RayCast2D> _rayCasts;
+    private AnimatedSprite _animatedSprite;
 #pragma warning restore CS8618 // Non-nullable field
 
     private readonly List<IBodyPart> _bodyParts = BodyParts.All();
@@ -59,6 +60,8 @@ public class Player : KinematicBody2D
     public override void _Ready()
     {
         _stateMachine = new StateMachine<IPlayerState>(new OnTheProwl(), OnStateChanged);
+
+        _animatedSprite = GetOrThrow<AnimatedSprite>(this, nameof(AnimatedSprite));
 
         var rayCast1 = GetOrThrow<RayCast2D>(this, $"{nameof(RayCast2D)}");
         var rayCast2 = GetOrThrow<RayCast2D>(this, $"{nameof(RayCast2D)}2");
@@ -104,21 +107,27 @@ public class Player : KinematicBody2D
 
         if (Input.IsActionPressed("right"))
         {
+            _animatedSprite.Play("idle-side");
+            _animatedSprite.FlipH = false;
             _velocity.x += 1;
         }
 
         if (Input.IsActionPressed("left"))
         {
+            _animatedSprite.Play("idle-side");
+            _animatedSprite.FlipH = true;
             _velocity.x -= 1;
         }
 
         if (Input.IsActionPressed("down"))
         {
+            _animatedSprite.Play("idle-front");
             _velocity.y += 1;
         }
 
         if (Input.IsActionPressed("up"))
         {
+            _animatedSprite.Play("idle-back");
             _velocity.y -= 1;
         }
 
