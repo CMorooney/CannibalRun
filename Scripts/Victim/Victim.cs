@@ -9,19 +9,12 @@ public class Victim : KinematicBody2D
     private StateMachine<IVictimState>? _stateMachine;
 
     private Stack<Vector2>? _currentPath;
-    private Action<IBodyPart>? _callback;
 
-    private readonly List<IBodyPart> _bodyParts = BodyParts.All();
-
-#pragma warning disable CS8618 // Non-nullable field
-    private ActionMenu _actionMenu;
-#pragma warning restore CS8618 // Non-nullable field
+    private readonly List<BodyPart> _bodyParts = BodyParts.All();
 
     public override void _Ready()
     {
         _stateMachine = new StateMachine<IVictimState>(new Waiting(), OnStateChanged);
-        _actionMenu = GetOrThrow<ActionMenu>(this, nameof(ActionMenu));
-        ConnectEvents();
     }
 
     public override void _PhysicsProcess(float delta)
@@ -30,22 +23,6 @@ public class Victim : KinematicBody2D
         {
             MoveAndSlide(_currentPath.Pop());
         }
-        else if(!(_stateMachine!.State is Waiting))
-        { 
-
-        }
-    }
-
-    public override void _ExitTree() => DisconnectEvents();
-
-    private void ConnectEvents()
-    {
-        _actionMenu.ItemSelected += MenuItemSelected;
-    }
-
-    private void DisconnectEvents()
-    { 
-        _actionMenu.ItemSelected -= MenuItemSelected;
     }
 
     private void OnStateChanged(IVictimState previousState, IVictimState newState)
@@ -66,23 +43,14 @@ public class Victim : KinematicBody2D
         }
     }
 
-    private void MenuItemSelected(string item)
-    {
-        var bodyPart = _bodyParts.FirstOrDefault(b => b.Name == item);
+    public List<BodyPart> GetAvailableBodyParts() => _bodyParts;
 
-        if (_callback != null)
+    public void TakeBodyPart(BodyPart taken)
+    {
+        var bodyPart = _bodyParts.FirstOrDefault(b => b.Name == taken.Name);
+        if (bodyPart != null)
         {
-            _callback(bodyPart);
+            _bodyParts.Remove(bodyPart);
         }
-
-        _bodyParts.Remove(bodyPart);
-        _callback = null;
-    }
-
-    public void ShowMenu(Action<IBodyPart> callback)
-    {
-        _stateMachine!.Update(new Wandering());
-        _actionMenu.Show(_bodyParts.Select(b => b.Name).ToHashSet<string>());
-        _callback = callback;
     }
 }

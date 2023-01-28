@@ -1,7 +1,6 @@
-[gd_scene load_steps=6 format=2]
+[gd_scene load_steps=5 format=2]
 
 [ext_resource path="res://Scripts/Victim/Victim.cs" type="Script" id=1]
-[ext_resource path="res://Scenes/ActionMenu.tscn" type="PackedScene" id=2]
 
 [sub_resource type="Image" id=3]
 data = {
@@ -21,8 +20,6 @@ extents = Vector2( 8, 8 )
 
 [node name="Sprite" type="KinematicBody2D"]
 script = ExtResource( 1 )
-
-[node name="ActionMenu" parent="." instance=ExtResource( 2 )]
 
 [node name="Sprite" type="Sprite" parent="."]
 texture = SubResource( 2 )

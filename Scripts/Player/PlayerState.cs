@@ -10,6 +10,13 @@ public record OnTheProwl : IPlayerState
 
 public record InteractingWithVictim : IPlayerState
 {
+    public Victim Victim { get; private set; }
+
+    public InteractingWithVictim(Victim victim)
+    {
+        Victim = victim;
+    }
+
     public bool CanTransitionTo(IPlayerState state) => state is ConsumingFlesh ||
                                                        state is OnTheProwl     ||
                                                        state is Dead;
@@ -17,9 +24,9 @@ public record InteractingWithVictim : IPlayerState
 
 public record ConsumingFlesh : IPlayerState
 {
-    public IBodyPart BodyPart { get; private set; }
+    public BodyPart BodyPart { get; private set; }
 
-    public ConsumingFlesh(IBodyPart _bodyPart)
+    public ConsumingFlesh(BodyPart _bodyPart)
     {
         BodyPart = _bodyPart;
     }

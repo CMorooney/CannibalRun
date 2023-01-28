@@ -45,7 +45,7 @@ public class Game : Node
 
     private void RestartGame() => GetTree().ReloadCurrentScene();
 
-    private void PlayerInventoryChanged(IBodyPart? bodyPart) => _hud.SetBodyPart(bodyPart);
+    private void PlayerInventoryChanged(BodyPart? bodyPart) => _hud.SetBodyPart(bodyPart);
 
     private void HandlePlayerHealthChanged(float newValue)
     {

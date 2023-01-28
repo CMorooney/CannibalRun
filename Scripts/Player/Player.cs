@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using static Utils;
 
 public delegate void HealthChanged(float newValue);
-public delegate void InventoryChanged(IBodyPart? bodyPart);
+public delegate void InventoryChanged(BodyPart? bodyPart);
 
 public class Player : KinematicBody2D
 {
@@ -42,12 +42,14 @@ public class Player : KinematicBody2D
 
     private StateMachine<IPlayerState>? _stateMachine;
 
+
 #pragma warning disable CS8618 // Non-nullable field
     private List<RayCast2D> _rayCasts;
     private AnimatedSprite _animatedSprite;
 #pragma warning restore CS8618 // Non-nullable field
 
-    private readonly List<IBodyPart> _bodyParts = BodyParts.All();
+    // going to instantiate this here rather than scene view since it's generic
+    private ActionMenu<BodyPart> _actionMenu = new ActionMenu<BodyPart>();
 
     private float _health = Constants.Player.MaxHealth;
 
@@ -61,6 +63,9 @@ public class Player : KinematicBody2D
 
         _animatedSprite = GetOrThrow<AnimatedSprite>(this, nameof(AnimatedSprite));
 
+        AddChild(_actionMenu);
+        _actionMenu.Owner = this;
+
         var rayCast1 = GetOrThrow<RayCast2D>(this, $"{nameof(RayCast2D)}");
         var rayCast2 = GetOrThrow<RayCast2D>(this, $"{nameof(RayCast2D)}2");
         var rayCast3 = GetOrThrow<RayCast2D>(this, $"{nameof(RayCast2D)}3");
@@ -68,7 +73,14 @@ public class Player : KinematicBody2D
         {
             rayCast1, rayCast2, rayCast3
         };
+
+        ConnectEvents();
     }
+
+    public override void _ExitTree() => DisconnectEvents();
+
+    private void ConnectEvents() => _actionMenu.ItemSelected += ActionMenuItemSelected;
+    private void DisconnectEvents() => _actionMenu.ItemSelected -= ActionMenuItemSelected;
 
     public override void _PhysicsProcess(float delta)
     {
@@ -217,8 +229,8 @@ public class Player : KinematicBody2D
                                       .FirstOrDefault();
                 if (target != null && target is Victim victim)
                 {
-                    _stateMachine.Update(new InteractingWithVictim());
-                    victim.ShowMenu(BodyPartTaken);
+                    _stateMachine.Update(new InteractingWithVictim(victim));
+                    _actionMenu.Show(victim.GetAvailableBodyParts().ToHashSet<BodyPart>());
                 }
                 break;
             case ConsumingFlesh fleshState:
@@ -240,7 +252,16 @@ public class Player : KinematicBody2D
 
     #endregion
 
-    private void TakeBite(IBodyPart bodyPart)
+    private void ActionMenuItemSelected(BodyPart item)
+    {
+        if (_stateMachine!.State is InteractingWithVictim interactingState)
+        {
+            _stateMachine!.Update(new ConsumingFlesh(item));
+            interactingState.Victim.TakeBodyPart(item);
+        }
+    }
+
+    private void TakeBite(BodyPart bodyPart)
     {
         bodyPart.Health -= HealthPerBite;
         if (bodyPart.Health > 0)
@@ -267,5 +288,5 @@ public class Player : KinematicBody2D
         }
     }
 
-    private void BodyPartTaken(IBodyPart bodyPart) => _stateMachine!.Update(new ConsumingFlesh(bodyPart));
+    private void BodyPartTaken(BodyPart bodyPart) => _stateMachine!.Update(new ConsumingFlesh(bodyPart));
 }

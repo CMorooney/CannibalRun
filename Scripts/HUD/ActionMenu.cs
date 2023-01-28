@@ -4,12 +4,12 @@ using System.Collections.Generic;
 
 using Array = Godot.Collections.Array;
 
-public class ActionMenu : VBoxContainer
+public class ActionMenu<T> : VBoxContainer where T : INameable
 {
-    public delegate void ItemSelectedDelegate(string item);
+    public delegate void ItemSelectedDelegate(T item);
     public event ItemSelectedDelegate? ItemSelected;
 
-    public void Show(ISet<string> items)
+    public void Show(ISet<T> items)
     {
         Button? previousButton = null;
 
@@ -17,7 +17,7 @@ public class ActionMenu : VBoxContainer
         {
             if (item == null) continue;
             var button = new Button();
-            button.Text = item;
+            button.Text = item.Name;
             AddChild(button);
             button.Owner = this;
 
@@ -38,7 +38,7 @@ public class ActionMenu : VBoxContainer
         Visible = true;
     }
 
-    private void ButtonPressed(string item)
+    private void ButtonPressed(T item)
     {
         ItemSelected?.Invoke(item);
 
