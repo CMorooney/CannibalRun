@@ -47,6 +47,6 @@ public class ActionMenu<T> : VBoxContainer where T : INameable
         foreach(Node child in GetChildren())
         {
             RemoveChild(child);
-	    }
-	}
+        }
+    }
 }
