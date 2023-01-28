@@ -6,11 +6,12 @@ using static Utils;
 
 public class Victim : KinematicBody2D
 {
-    //TODO: state machine
+    private StateMachine<IVictimState>? _stateMachine;
 
-    public Action<IBodyPart>? _callback;
+    private Stack<Vector2>? _currentPath;
+    private Action<IBodyPart>? _callback;
 
-    private List<IBodyPart> _bodyParts = BodyParts.All();
+    private readonly List<IBodyPart> _bodyParts = BodyParts.All();
 
 #pragma warning disable CS8618 // Non-nullable field
     private ActionMenu _actionMenu;
@@ -18,14 +19,24 @@ public class Victim : KinematicBody2D
 
     public override void _Ready()
     {
+        _stateMachine = new StateMachine<IVictimState>(new Waiting(), OnStateChanged);
         _actionMenu = GetOrThrow<ActionMenu>(this, nameof(ActionMenu));
         ConnectEvents();
     }
 
-    public override void _ExitTree()
+    public override void _PhysicsProcess(float delta)
     {
-        DisconnectEvents();
+        if (_currentPath?.Count > 0)
+        {
+            MoveAndSlide(_currentPath.Pop());
+        }
+        else if(!(_stateMachine!.State is Waiting))
+        { 
+
+        }
     }
+
+    public override void _ExitTree() => DisconnectEvents();
 
     private void ConnectEvents()
     {
@@ -35,6 +46,24 @@ public class Victim : KinematicBody2D
     private void DisconnectEvents()
     { 
         _actionMenu.ItemSelected -= MenuItemSelected;
+    }
+
+    private void OnStateChanged(IVictimState previousState, IVictimState newState)
+    { 
+        switch(newState)
+        {
+            case Wandering:
+                _currentPath = new Stack<Vector2>(
+                                        Navigation2DServer.MapGetPath(
+                                            map:GetWorld2d().NavigationMap,
+                                            origin: GlobalPosition,
+                                            destination: new Vector2(),
+                                            optimize: false,
+                                            navigationLayers: 1
+                                        )
+                );
+                break;
+        }
     }
 
     private void MenuItemSelected(string item)
@@ -52,6 +81,7 @@ public class Victim : KinematicBody2D
 
     public void ShowMenu(Action<IBodyPart> callback)
     {
+        _stateMachine!.Update(new Wandering());
         _actionMenu.Show(_bodyParts.Select(b => b.Name).ToHashSet<string>());
         _callback = callback;
     }
