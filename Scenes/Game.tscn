@@ -21,4 +21,3 @@ position = Vector2( 488, 463 )
 position = Vector2( 553, 473 )
 
 [editable path="Victim"]
-[editable path="Victim/ActionMenu"]

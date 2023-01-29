@@ -256,8 +256,11 @@ public class Player : KinematicBody2D
     {
         if (_stateMachine!.State is InteractingWithVictim interactingState)
         {
-            _stateMachine!.Update(new ConsumingFlesh(item));
-            interactingState.Victim.TakeBodyPart(item);
+            var fromVictim = interactingState.Victim.TakeBodyPart(item);
+            if (fromVictim != null)
+            {
+                _stateMachine!.Update(new ConsumingFlesh(fromVictim));
+            }
         }
     }
 

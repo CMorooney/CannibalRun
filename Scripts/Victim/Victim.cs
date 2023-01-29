@@ -4,11 +4,13 @@ using System.Linq;
 using System.Collections.Generic;
 using static Utils;
 
+public delegate void DestinationReached(Victim victim, Vector2 position);
+
 public class Victim : KinematicBody2D
 {
-    private StateMachine<IVictimState>? _stateMachine;
+    public event DestinationReached? DestinationReached;
 
-    private Stack<Vector2>? _currentPath;
+    private StateMachine<IVictimState>? _stateMachine;
 
     private readonly List<BodyPart> _bodyParts = BodyParts.All();
 
@@ -19,38 +21,60 @@ public class Victim : KinematicBody2D
 
     public override void _PhysicsProcess(float delta)
     {
-        if (_currentPath?.Count > 0)
+        switch(_stateMachine!.State)
         {
-            MoveAndSlide(_currentPath.Pop());
-        }
-    }
-
-    private void OnStateChanged(IVictimState previousState, IVictimState newState)
-    { 
-        switch(newState)
-        {
-            case Wandering:
-                _currentPath = new Stack<Vector2>(
-                                        Navigation2DServer.MapGetPath(
-                                            map:GetWorld2d().NavigationMap,
-                                            origin: GlobalPosition,
-                                            destination: new Vector2(),
-                                            optimize: false,
-                                            navigationLayers: 1
-                                        )
-                );
+            case Wandering wanderingState:
+                if (wanderingState.Path?.Count <= 0)
+                {
+                    _stateMachine!.Update(new Waiting());
+                }
+                else if(wanderingState.Path != null)
+                {
+                    MoveAndSlide(ToLocal(wanderingState.Path.Pop()));
+                    _stateMachine!.Update(new Wandering(wanderingState.Path));
+                }
                 break;
         }
     }
 
+    private void OnStateChanged(IVictimState oldState, IVictimState newState)
+    { 
+        switch(newState)
+        {
+            case Waiting:
+                DestinationReached?.Invoke(this, GlobalPosition);
+                break;
+        }
+    }
+
+    private Vector2[] CreateNewPath(Vector2 destination) =>
+        Navigation2DServer.MapGetPath(
+            map: GetWorld2d().NavigationMap,
+            origin: GlobalPosition,
+            destination: destination,
+            optimize: false,
+            navigationLayers: 1
+        );
+
+    public void SetNewDestination(Vector2 destination)
+    {
+        var path = new Stack<Vector2>(CreateNewPath(destination));
+        _stateMachine!.Update(new Wandering(path));
+    }
+
     public List<BodyPart> GetAvailableBodyParts() => _bodyParts;
 
-    public void TakeBodyPart(BodyPart taken)
+    public BodyPart? TakeBodyPart(BodyPart toTake)
     {
-        var bodyPart = _bodyParts.FirstOrDefault(b => b.Name == taken.Name);
+        DestinationReached?.Invoke(this, GlobalPosition);
+        var bodyPart = _bodyParts.FirstOrDefault(b => b.Name == toTake.Name);
         if (bodyPart != null)
         {
             _bodyParts.Remove(bodyPart);
+            return bodyPart;
         }
+
+        return null;
     }
 }
+
