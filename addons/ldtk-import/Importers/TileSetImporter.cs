@@ -35,7 +35,7 @@ namespace Picalines.Godot.LDtkImport.Importers
             uint gridSize = gridWidth * gridHeight;
 
             var blockTileIds = tileSetJson.EnumTags.First<TileEnumTag>(t => t.EnumValueId == "Block").TileIds;
-            var traversableTilsIds = tileSetJson.EnumTags.First<TileEnumTag>(t => t.EnumValueId == "Traverse").TileIds;
+            var traversableTilsIds = tileSetJson.EnumTags.First<TileEnumTag>(t => t.EnumValueId == "Walkable").TileIds;
 
             var usedTileIds = tileSet.GetTilesIds();
 

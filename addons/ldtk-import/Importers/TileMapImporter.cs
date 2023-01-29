@@ -47,6 +47,17 @@ namespace Picalines.Godot.LDtkImport.Importers
 
                 stackTileMap.Name = layerJson.Identifier;
                 stackTileMap.ShowCollision = true;
+
+                var navigationData = context.ImportSettings?
+                                            .NavigationLayers?
+                                            .FirstOrDefault(l => l.LayerName == layerJson.Identifier);
+
+                if (navigationData != null && navigationData.NavigationLayer.HasValue)
+                {
+                    stackTileMap.BakeNavigation = true;
+                    stackTileMap.NavigationLayers = navigationData.NavigationLayer.Value;
+                }
+
                 stackTileMap.AddToGroup(StackLayerGroupName, persistent: false);
 
                 layerNode.AddChild(stackTileMap);
@@ -65,11 +76,6 @@ namespace Picalines.Godot.LDtkImport.Importers
             foreach (var tileLayer in tileLayers)
             {
                 SetTilesOrEntities(context, layerTileMaps[tileLayer.Key], tileLayer, tileEntities);
-            }
-
-            if (layerJson.Type is LayerType.IntGrid)
-            {
-                AddIntGrid(layerJson, layerNode);
             }
         }
 
@@ -91,7 +97,6 @@ namespace Picalines.Godot.LDtkImport.Importers
                     {
                         entityParent.AddChild(tileEntity);
                         tileEntity.Owner = tileMap.Owner;
-
                         PrepareTileEntity(tileEntity, tileEntityData, tileMap, tile);
                     }
                 }
@@ -138,28 +143,6 @@ namespace Picalines.Godot.LDtkImport.Importers
             entityFields[LDtkConstants.SpecialFieldNames.Size] = tileMap.CellSize;
 
             LDtkFieldAssigner.Assign(tileEntity, entityFields, new() { GridSize = tileMap.CellSize });
-        }
-
-        private static void AddIntGrid(LevelJson.LayerInstance layer, Node layerNode)
-        {
-            var intMap = new TileMap()
-            {
-                Name = "IntGrid",
-                CellSize = layer.GridSizeV,
-            };
-
-            var nonEmptyCells = layer.IntGrid
-                .Select((value, id) => new { id, value })
-                .Where(p => p.value > 0);
-
-            foreach (var p in nonEmptyCells)
-            {
-                var gridCoords = TileCoord.IdToGrid(p.id, layer.CellsWidth);
-                intMap.SetCellv(gridCoords, p.value);
-            }
-
-            layerNode.AddChild(intMap);
-            intMap.Owner = layerNode;
         }
 
         private static Dictionary<int, TileEntityCustomData>? GetTileEntities(LevelImportContext context, LevelJson.LayerInstance layerJson)

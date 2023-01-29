@@ -16,6 +16,9 @@ namespace Picalines.Godot.LDtkImport.Json
         [JsonProperty("outputDir", Required = Required.Always)]
         public string OutputDirectory { get; private set; } = null!;
 
+        [JsonProperty("navigationLayers")]
+        public NavigationLayerSettings[]? NavigationLayers { get; private set; } = null;
+
         [JsonProperty("clearOutput")]
         public bool ClearOutput { get; private set; } = false;
 
@@ -90,6 +93,15 @@ namespace Picalines.Godot.LDtkImport.Json
 
         [JsonProperty("ignoreBgColor")]
         public bool IgnoreBackgroundColor { get; private set; } = false;
+    }
+
+    internal sealed class NavigationLayerSettings
+    {
+        [JsonProperty("name")]
+        public string? LayerName { get; private set; }
+
+        [JsonProperty("navigationLayer")]
+        public uint? NavigationLayer { get; private set; }
     }
 }
 
