@@ -13,7 +13,10 @@ namespace Picalines.Godot.LDtkImport.Importers
             Node levelNode = BaseSceneImporter.ImportOrCreate<Node2D>(context.ImportSettings.LevelSceneSettings);
 
             levelNode.Name = context.LevelJson.Identifier;
-            levelNode.SetScript(ResourceLoader.Load("Scripts/TileMap/TileMapsContainer.cs"));
+            if (context.ImportSettings.ParentScriptPath != null)
+            {
+                levelNode.SetScript(ResourceLoader.Load(context.ImportSettings.ParentScriptPath));
+            }
             levelNode.SetMeta(LDtkConstants.MetaKeys.ImportSettingsFilePath, context.ImportSettings.FilePath);
 
             if (levelNode is Node2D levelNode2D)
