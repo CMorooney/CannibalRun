@@ -19,6 +19,9 @@ namespace Picalines.Godot.LDtkImport.Json
         [JsonProperty("navigationLayers")]
         public NavigationLayerSettings[]? NavigationLayers { get; private set; } = null;
 
+        [JsonProperty("parentScriptPath")]
+        public string? ParentScriptPath { get; private set; }
+
         [JsonProperty("clearOutput")]
         public bool ClearOutput { get; private set; } = false;
 
